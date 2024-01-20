@@ -54,6 +54,12 @@ public class AppTest {
 
         responseGet.getBody().prettyPrint();
 
+        // Преобразование тела ответа в список Map
+        List<Map<String, Object>> responseList1 = responseGet.jsonPath().getList("$");
+        // Получение количества объектов
+        int numberOfObjectsInFirstGet = responseList1.size();
+
+
         // Здесь будут куки от предыдущего запроса
         Cookies cookies = responseGet.getDetailedCookies();
 
@@ -70,7 +76,10 @@ public class AppTest {
                 .cookies(cookies)
                 .spec(requestSpec)
                 .when()
-                .get("/");
+                .get("/")
+                .then()
+                .statusCode(200)
+                .extract().response();
 
         String responseBodyPost = responseGet2.getBody().asString();
         System.out.println(" ----------------- List --------------------------- ");
@@ -80,7 +89,7 @@ public class AppTest {
                 new TypeReference<>() {
                 });
 
-        Assertions.assertEquals(5, responseList.size(), "Кол-во элементов не соответствует!");
+        Assertions.assertEquals(numberOfObjectsInFirstGet + 1, responseList.size(), "Кол-во элементов не соответствует!");
 
         responseList.forEach(System.out::println);
 
@@ -94,12 +103,12 @@ public class AppTest {
         Assertions.assertEquals(exotic, lastElement.get("exotic"),
                 "Экзотичность элемента не соответствует ожидаемой!");
 
+        // Сброс данных
         given()
                 .baseUri(RESET_URL)
                 .when()
                 .post()
                 .then()
-                .statusCode(200)
-                .extract().response();
+                .statusCode(200);
     }
 }

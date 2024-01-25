@@ -73,6 +73,15 @@ public class AppTest {
         resetData();
     }
 
+    /**
+     * Проверка данных GET-запроса
+     *
+     * @param responseGet Переменная GET-запроса
+     * @param numberOfObjectsInFirstGet Кол-во элементов, которое было в первом GET-запросе
+     * @param name        Название продукта
+     * @param type        Тип продукта
+     * @param exotic      Флаг экзотичности продукта
+     * */
     private void CheckDataAfterPost(Response responseGet, int numberOfObjectsInFirstGet,
                                     String name, String type, boolean exotic) throws JsonProcessingException {
         String responseBodyPost = responseGet.getBody().asString();

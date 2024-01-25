@@ -45,12 +45,15 @@ public class AppTest {
     public void restTest(String name, String type, boolean exotic) throws JsonProcessingException {
         final RequestSpecification requestSpec = RequestSpecBuilderUtil.buildRequestSpec(BASE_URL);
 
+        // Выполняем GET-запрос для просмотра данных
         Response responseGet = executeGetRequest(requestSpec);
 
+        // Вывести товары в консоль в удобном представлении
         responseGet.getBody().prettyPrint();
 
         // Преобразование тела ответа в список Map
         List<Map<String, Object>> responseList1 = responseGet.jsonPath().getList("$");
+
         // Получение количества объектов
         int numberOfObjectsInFirstGet = responseList1.size();
 
@@ -60,14 +63,24 @@ public class AppTest {
         // Выполняем POST-запрос
         executePostRequestWithCookies(requestSpec, name, type, exotic, cookies);
 
+        // Выполняем GET-запрос после добавления элемента
         Response responseGet2 = executeGetRequestWithCookies(requestSpec, cookies);
 
-        System.out.println(" --------------------------- List --------------------------- ");
+        // Проверка данных после добавления элемента
+        CheckDataAfterPost(responseGet2, numberOfObjectsInFirstGet, name, type, exotic);
 
-        String responseBodyPost = responseGet2.getBody().asString();
+        // Сброс данных
+        resetData();
+    }
+
+    private void CheckDataAfterPost(Response responseGet, int numberOfObjectsInFirstGet,
+                                    String name, String type, boolean exotic) throws JsonProcessingException {
+        String responseBodyPost = responseGet.getBody().asString();
+
         ObjectMapper objectMapper = new ObjectMapper();
         List<Map<String, Object>> responseList = objectMapper.readValue(responseBodyPost, new TypeReference<>() {});
 
+        // Проверка, что после добавления товара их количество стало на 1 больше
         Assertions.assertEquals(numberOfObjectsInFirstGet + 1, responseList.size(),
                 "Кол-во элементов не соответствует ожидаемому значению!");
 
@@ -76,15 +89,13 @@ public class AppTest {
         // Получаем последний элемент из списка
         Map<String, Object> lastElement = responseList.get(responseList.size() - 1);
 
+        // Проверка значений в товаре
         Assertions.assertEquals(name, lastElement.get("name"),
                 "Название элемента не соответствует ожидаемому!");
         Assertions.assertEquals(type, lastElement.get("type"),
                 "Тип элемента не соответствует ожидаемому!");
         Assertions.assertEquals(exotic, lastElement.get("exotic"),
                 "Экзотичность элемента не соответствует ожидаемой!");
-
-        // Сброс данных
-        resetData();
     }
 
     /**

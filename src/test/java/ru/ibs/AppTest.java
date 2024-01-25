@@ -58,7 +58,7 @@ public class AppTest {
         Cookies cookies = responseGet.getDetailedCookies();
 
         // Выполняем POST-запрос
-        executePostRequest(requestSpec, name, type, exotic, cookies);
+        executePostRequestWithCookies(requestSpec, name, type, exotic, cookies);
 
         Response responseGet2 = executeGetRequestWithCookies(requestSpec, cookies);
 
@@ -116,7 +116,7 @@ public class AppTest {
      * @param exotic      Флаг экзотичности продукта
      * @param cookies     Куки для понимания того, кто отправил запрос
      */
-    private void executePostRequest(RequestSpecification requestSpec, String name, String type,
+    private void executePostRequestWithCookies(RequestSpecification requestSpec, String name, String type,
                                     boolean exotic, Cookies cookies) {
         given().cookies(cookies).spec(requestSpec).body(buildRequestBody(name, type, exotic)).
                 post("/").then().statusCode(200);

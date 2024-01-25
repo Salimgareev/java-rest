@@ -66,11 +66,10 @@ public class AppTest {
 
         String responseBodyPost = responseGet2.getBody().asString();
         ObjectMapper objectMapper = new ObjectMapper();
-        List<Map<String, Object>> responseList = objectMapper.readValue(responseBodyPost,
-                new TypeReference<>() {
-                });
+        List<Map<String, Object>> responseList = objectMapper.readValue(responseBodyPost, new TypeReference<>() {});
 
-        Assertions.assertEquals(numberOfObjectsInFirstGet + 1, responseList.size(), "Кол-во элементов не соответствует!");
+        Assertions.assertEquals(numberOfObjectsInFirstGet + 1, responseList.size(),
+                "Кол-во элементов не соответствует ожидаемому значению!");
 
         responseList.forEach(System.out::println);
 

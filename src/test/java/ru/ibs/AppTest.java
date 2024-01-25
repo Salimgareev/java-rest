@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
+import static ru.ibs.RequestSpecBuilderUtil.buildRequestSpec;
 
 /**
  * Класс для тестирования REST API
@@ -45,15 +46,9 @@ public class AppTest {
             "Ананас, FRUIT, true"
     })
     public void restTest(String name, String type, boolean exotic) throws JsonProcessingException {
-        RequestSpecification requestSpec = buildRequestSpec();
+        final RequestSpecification requestSpec = RequestSpecBuilderUtil.buildRequestSpec(BASE_URL);
 
-        Response responseGet = given()
-                .spec(requestSpec)
-                .when()
-                .get("/")
-                .then()
-                .statusCode(200)
-                .extract().response();
+        Response responseGet = executeGetRequest(requestSpec);
 
         responseGet.getBody().prettyPrint();
 
@@ -68,18 +63,11 @@ public class AppTest {
         // Выполняем POST-запрос
         executePostRequest(requestSpec, name, type, exotic, cookies);
 
-        Response responseGet2 = given()
-                .cookies(cookies)
-                .spec(requestSpec)
-                .when()
-                .get("/")
-                .then()
-                .statusCode(200)
-                .extract().response();
+        Response responseGet2 = executeGetRequestWithCookies(requestSpec, cookies);
 
-        String responseBodyPost = responseGet2.getBody().asString();
         System.out.println(" --------------------------- List --------------------------- ");
 
+        String responseBodyPost = responseGet2.getBody().asString();
         ObjectMapper objectMapper = new ObjectMapper();
         List<Map<String, Object>> responseList = objectMapper.readValue(responseBodyPost,
                 new TypeReference<>() {
@@ -104,16 +92,22 @@ public class AppTest {
     }
 
     /**
-     * Создает и возвращает объект RequestSpecification
+     * Выполняет GET-запрос с Cookies
      *
-     * @return RequestSpecification объект спецификации для дальнейшего создания запросов
-     */
-    private RequestSpecification buildRequestSpec() {
-        return new RequestSpecBuilder()
-                .setBaseUri(BASE_URL)
-                .setAccept("*/*")
-                .setContentType(ContentType.JSON)
-                .build();
+     * @param requestSpec Спецификация для get-запроса
+     * @param cookies Куки от предыдущего запроса
+     * */
+    private Response executeGetRequestWithCookies(RequestSpecification requestSpec, Cookies cookies) {
+        return given().cookies(cookies).spec(requestSpec).when().get("/").then().statusCode(200).extract().response();
+    }
+
+    /**
+     * Выполняет GET-запрос
+     *
+     * @param requestSpec Спецификация для get-запроса
+     * */
+    private Response executeGetRequest(RequestSpecification requestSpec) {
+        return given().spec(requestSpec).when().get("/").then().statusCode(200).extract().response();
     }
 
     /**
